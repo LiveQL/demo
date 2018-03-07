@@ -28,8 +28,6 @@ resolvers.Query.users = () => {
 };
 
 resolvers.Query.singleUser = (_, val) => {
-	console.log('here in the single user resolver');
-	console.log(val);
 	return Users.findOne(val, (err) => {
 		if (err) throw err;
 	}).then((result) => {
@@ -40,7 +38,6 @@ resolvers.Query.singleUser = (_, val) => {
 }
 
 resolvers.Query.getAllTopics = () => {
-	console.log('here in the get all topics resolver');
 	return Topics.find({}, (err) => {
 		if (err) throw err;
 	}).then((result) => {
@@ -73,7 +70,6 @@ resolvers.Topic.comments = (topic) => {
 
 
 resolvers.User.comments = (author) => {
-	console.log(author);
 	let theAuthor = author.username;
 	return Comments.find({author: theAuthor}, (err) => {
 		if (err) throw err;
@@ -85,7 +81,6 @@ resolvers.User.comments = (author) => {
 }
 
 resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
-	console.log('here in the add user resolver');
 	return Users.create(usernameAndPassWord).then((result) => {
 		pubsub.publish('addAnotherUser', {addUser: result});
 		return result;
@@ -94,34 +89,26 @@ resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
 
 //this resolver resolves a schema defined query that takes in a user
 resolvers.Mutation.updatePassword = (_, usernameAndNewPassword) => {
-	console.log('here in update password resolver');
-	console.log(usernameAndNewPassword);
 	return Users.findOneAndUpdate(
 		{username: usernameAndNewPassword.username}, //here we find a document based on the username
 		{password: usernameAndNewPassword.newPassword} //here we update the document that was found and change the password to be the new pw
 	).then((result) => {
-		console.log(result);
 		return result;
 	});
 }
 
 //this resolver takes user obj and removes it from the db.
 resolvers.Mutation.deleteUser = (_, userObj) => {
-	console.log('here in update delete user resolver');
-	console.log(userObj);
 	return Users.findOneAndRemove(userObj).then(() => true);
 }
 
 resolvers.Mutation.addTopic = (_, topicObj) => {
-	console.log('here in the add topic resolver');
-	console.log(topicObj);
 	return Topics.create(topicObj).then((result) => {
 		return result;
 	});
 }
 
 resolvers.Mutation.addComment = (_, commentObj) => {
-	console.log('here in the add comment resolver');
 	return Comments.create(commentObj).then((result) => {
 		return result;
 	});
