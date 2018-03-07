@@ -5,8 +5,12 @@ import { InMemoryCache } from 'apollo-cache-inmemory/lib/index'
 
 import { split } from 'apollo-link';
 import { HttpLink } from 'apollo-link-http';
-import { WebSocketLink } from 'apollo-link-ws';
+// import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
+
+//socket client
+import SocketIOClient from 'socket.io-client';
+
 
 // Create an http link:
 const httpLink = new HttpLink({
@@ -75,7 +79,10 @@ class App extends Component {
 		this.state = {
 			'topics': null,
 			'users': null
-		}
+		};
+
+		//socket stuff
+		this.socket = SocketIOClient('http://localhost:3000');
 
 		//all function bindings
 		this.getAllTopics = this.getAllTopics.bind(this);
@@ -101,6 +108,13 @@ class App extends Component {
 		});
 	}
 
+	componentWillMount() {
+    const socket = SocketIOClient.connect('http://localhost:3000');
+    socket.on('news', function (data) {
+      console.log(data);
+      socket.emit('my other event', { my: 'data' });
+    });
+	}
 
 	render() {
 		return (
