@@ -82,7 +82,7 @@ resolvers.User.comments = (author) => {
 
 resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
 	return Users.create(usernameAndPassWord).then((result) => {
-		pubsub.publish('addAnotherUser', {addUser: result});
+		// pubsub.publish('addAnotherUser', {addUser: result});
 		return result;
 	});
 }
