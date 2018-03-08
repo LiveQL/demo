@@ -1,0 +1,38 @@
+body {
+  padding: 50px;
+  background-color: #66CCFF;
+  font-family: sans-serif;
+}
+#root { 
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+.ReadButtons button {
+  padding: 10px;
+  font-size: 16px;
+  margin: 10px;
+  margin-right: 0px;
+  background-color: #0066FF;
+  color: #FFF;
+  border: 2px solid #0066FF;
+  border-radius: 10px;
+  outline: 0; 
+}
+.ReadButtons button:hover {
+  background-color: #FFFFFF;
+  color: #0066FF;
+  border: 2px solid #FFFFFF;
+  cursor: pointer;
+  outline: 0; 
+}
+.header {
+  /* border: 1px solid black; */
+  /* box-shadow: 10px 10px 10px lightgrey; */
+}
+.header h1 {
+  color: white;
+}
+.topic {
+  list-style-type: none;
+}
