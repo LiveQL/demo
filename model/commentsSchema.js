@@ -5,7 +5,7 @@ mongoose.connect('mongodb://xavyr:Sagecock02@ds249418.mlab.com:49418/graphql_pra
 
 var commentsSchema = new Schema({
 	author: String, //should be a user
-	topic: String, //this will be topic ID
+	topicId: String, //this will be topic ID
 	text: String,
 	netScore: Number
 }, {collection: 'Comments'});

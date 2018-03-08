@@ -53,6 +53,16 @@ resolvers.Query.getAllTopics = () => {
 	});
 }
 
+resolvers.Query.getAllComments = () => {
+	return Comments.find({}, (err) => {
+		if (err) throw err;
+	}).then((result) => {
+		return result;
+	}).catch((err) => {
+		console.log(err);
+	});
+}
+
 resolvers.Query.getASingleComment = (text) => {
 	return Comments.findOne(text, (err) => {
 		if (err) throw err;
@@ -64,8 +74,8 @@ resolvers.Query.getASingleComment = (text) => {
 }
 
 resolvers.Topic.comments = (topic) => {
-	let theTopic = topic.topic;
-	return Comments.find({topic: theTopic}, (err) => {
+	let topicId = topic._id;
+	return Comments.find({topicId: topicId}, (err) => {
 		if (err) throw err;
 	}).then((result) => {
 		return result;
@@ -73,7 +83,6 @@ resolvers.Topic.comments = (topic) => {
 		console.log(err);
 	})
 }
-
 
 resolvers.User.comments = (author) => {
 	let theAuthor = author.username;
@@ -88,7 +97,6 @@ resolvers.User.comments = (author) => {
 
 resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
 	return Users.create(usernameAndPassWord).then((result) => {
-		//pubsub.publish('addAnotherUser', {addUser: result});
 		return result;
 	});
 }
@@ -117,6 +125,16 @@ resolvers.Mutation.addTopic = (_, topicObj) => {
 resolvers.Mutation.addComment = (_, commentObj) => {
 	return Comments.create(commentObj).then((result) => {
 		return result;
+	});
+}
+
+resolvers.Mutation.increaseLikes = (_, original) => {
+	return Comments.findOne({_id: original._id}).then((result) => {
+		let updated = result;
+		updated.netScore += 1;
+		return Comments.update({_id: original._id}, updated).then((result) => {
+			return updated;
+		});
 	});
 }
 
