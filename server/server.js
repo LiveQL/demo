@@ -1,14 +1,11 @@
 const { makeExecutableSchema } = require('graphql-tools');
 const express = require('express');
-const cors = require('cors');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
 const bodyParser = require('body-parser');
-
-
-
+const cors = require('cors');
 const typeDefs = require('./../controller/graphqlSchema.js');
 const resolvers = require('./../controller/resolvers.js');
 
@@ -34,7 +31,7 @@ io.on('connection', function (socket) {
 app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
 
 
-app.use('/graphiql', graphiqlExpress({
+app.use('/', graphiqlExpress({
 	endpointURL: '/graphql',
 }));
 
