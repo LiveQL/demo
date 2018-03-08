@@ -1,27 +1,19 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 
-class RecievedData extends React.Component {
+class ReceivedData extends React.Component {
 	render() {
 		let topics;
 		let users;
 
 		if (Array.isArray(this.props.topics)) {
-			const listItems = this.props.topics.map(({topic, comments}, ind) => {
-				return (
-					<div className='topic'>
-						<li key={topic}>{topic}</li>
-						<ul key={comments}>{comments.map(({author, topic, text}, ind) => {
-							return (
-								<div className='topic'>
-									<li key={author}>Author: {author}</li>
-									<li key={topic}>Topic: {topic}</li>
-									<li key={text}>Text: {text}</li>
-								</div>
-							);
-						})}</ul>
-					</div>
-				);
-			})
+			const listItems = this.props.topics.map(({ topic }, ind) => {
+				return <div className='topic'>
+						<Link to={topic}>
+							<li key={topic}>{topic}</li>
+						</Link>
+					</div>;
+			});
 			console.log('Outside map', listItems)
 			return (
 				<div id={this.props.id}>
@@ -55,4 +47,4 @@ class RecievedData extends React.Component {
       );
 	}
 }
-export default RecievedData;
+export default ReceivedData;

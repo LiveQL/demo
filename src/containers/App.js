@@ -8,8 +8,9 @@ import { getMainDefinition } from 'apollo-utilities';
 import SocketIOClient from 'socket.io-client';
 import Header from "./../components/Header.js";
 import Read from "./../components/Read.js";
-import RecievedData from "./../components/RecievedData.js";
-
+// import RecievedData from "./../components/RecievedData.js";
+import { Switch, Route } from 'react-router-dom'
+import ReceivedData from "../components/RecievedData";
 
 const httpLink = new HttpLink({
 	uri: 'http://localhost:3000/graphql'
@@ -100,9 +101,9 @@ class App extends Component {
 		return (
 			<div className='login-component'>
 				<Header />
-				<Read getAllTopics={this.getAllTopics} getAllUsers={this.getAllUsers} />
-				<RecievedData topics={this.state.topics} users={this.state.users} />
-				{/* {check} */}
+        <Read getAllTopics={this.getAllTopics} getAllUsers={this.getAllUsers} />
+        <ReceivedData topics={this.state.topics} users={this.state.users} />
+
 			</div>
 		)
 	}
