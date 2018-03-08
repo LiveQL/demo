@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
-//the lead component
-let App = require('./containers/AllComponents.jsx').app;
-//the Apollo Client
-let client = require('./containers/AllComponents.jsx').apolloClient;
+const App = require('./containers/App.js').app;
+const client = require('./containers/App.js').apolloClient;
 
 
 ReactDOM.render(
