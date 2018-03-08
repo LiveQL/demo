@@ -11,6 +11,8 @@ import { getMainDefinition } from 'apollo-utilities';
 //socket client
 import SocketIOClient from 'socket.io-client';
 
+//import { subscribeToTimer } from './../../subscribeToTimer';
+import openSocket from 'socket.io-client';
 
 // Create an http link:
 const httpLink = new HttpLink({
@@ -78,11 +80,10 @@ class App extends Component {
 		super();
 		this.state = {
 			'topics': null,
-			'users': null
+			'users': null,
+			username: 'no timestamp yet',
+			endpoint: 'http://localhost:3000'
 		};
-
-		//socket stuff
-		this.socket = SocketIOClient('http://localhost:3000');
 
 		//all function bindings
 		this.getAllTopics = this.getAllTopics.bind(this);
@@ -108,17 +109,26 @@ class App extends Component {
 		});
 	}
 
-	componentWillMount() {
-    const socket = SocketIOClient.connect('http://localhost:3000');
-    socket.on('news', function (data) {
-      console.log(data);
-      socket.emit('my other event', { my: 'data' });
-    });
+
+	componentDidMount() {
+		const  socket = openSocket(this.state.endpoint);
+		socket.on('mutatedData', username => {
+		//	if (username) {
+				console.log("component did mount", username);
+				this.setState({
+					username: username.username
+				});
+			//}
+		});
 	}
 
 	render() {
+		console.log('state has changed right?', this.state.username);
 		return (
 				<div className='login-component'>
+					<p className="">
+						This is the timer value: {this.state.username}
+					</p>
 					<Header/>
 					<Read getAllTopics={this.getAllTopics} getAllUsers={this.getAllUsers}/>
 					<RecievedData topics={this.state.topics} users={this.state.users}/>

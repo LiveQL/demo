@@ -2,18 +2,24 @@ const mongoose = require('mongoose');
 const Users = require('../model/userSchema.js');
 const Topics = require('../model/topicSchema.js');
 const Comments = require('../model/commentsSchema.js');
-// const PubSub = require('graphql-subscriptions').PubSub;
-// const withFilter =require('graphql-subscriptions').withFilter;
+
+const { io } = require('./../server/higher.js');
 
 const resolvers = {};
-
-//const pubsub = new PubSub();
-
 resolvers.Query = {};
 resolvers.Mutation = {};
 resolvers.Topic = {};
 resolvers.User = {};
-//resolvers.Subscription = {};
+
+const directiveResolvers = {
+	live: (resolve, source, args, context, info) => {
+		return resolve().then((result) => {
+			console.log(result);
+			io.sockets.emit('mutatedData', result);
+			return result;
+		});
+	},
+};
 
 resolvers.Query.users = () => {
 	return Users.find({}, (err) => {
@@ -82,7 +88,7 @@ resolvers.User.comments = (author) => {
 
 resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
 	return Users.create(usernameAndPassWord).then((result) => {
-		pubsub.publish('addAnotherUser', {addUser: result});
+		//pubsub.publish('addAnotherUser', {addUser: result});
 		return result;
 	});
 }
@@ -114,13 +120,7 @@ resolvers.Mutation.addComment = (_, commentObj) => {
 	});
 }
 
-// resolvers.Subscription = {
-// 	addUser: {
-// 		subscribe: () => {
-// 			return pubsub.asyncIterator('addAnotherUser');
-// 		}
-// 	}
-// }
+
 
 
 
@@ -137,4 +137,4 @@ resolvers.Mutation.addComment = (_, commentObj) => {
 
 
 
-module.exports = resolvers;
+module.exports = {resolvers, directiveResolvers};

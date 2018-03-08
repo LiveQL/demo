@@ -5,6 +5,7 @@
 //that points to a function that goes and fetches that data and returns the types that fit the demanded Schema, (User)
 
 const schema = `
+	directive @live on FIELD | FIELD_DEFINITION | QUERY
 	type Query {
     users: [User]
     singleUser(username: String): User
@@ -29,7 +30,7 @@ const schema = `
   type Mutation {
     addTopic(content: String, topic: String ): Topic
     addComment(author: String, topic: String, text: String, netScore: Int): Comment
-    addUser(username: String, password: String): User
+    addUser(username: String, password: String): User @live
     updatePassword(username: String, newPassword: String): User
     deleteUser(username: String, password: String): User
   }
