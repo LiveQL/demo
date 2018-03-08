@@ -1,7 +1,10 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: {
+    main: path.join(__dirname, 'src/index.js')
+  },
   output: {
     path: path.join(__dirname, 'public'),
     filename: 'bundle.js'
@@ -9,13 +12,16 @@ module.exports = {
   module: {
     rules: [
       {
-        loader: 'babel-loader',
         test: /\.js$|\.jsx$/,
-        exclude: /node_modules/
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+        query: {
+          presets: ["env", "react"]
+        }
       },
       {
-        test: /.scss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
+        test: /.css$/,
+        use: ['style-loader', 'css-loader']
       },
 	    {
 	    	test: /\.(png|svg|jpg|jpeg|gif)$/,
