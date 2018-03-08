@@ -2,18 +2,24 @@ const mongoose = require('mongoose');
 const Users = require('../model/userSchema.js');
 const Topics = require('../model/topicSchema.js');
 const Comments = require('../model/commentsSchema.js');
-// const PubSub = require('graphql-subscriptions').PubSub;
-// const withFilter =require('graphql-subscriptions').withFilter;
+
+const { io } = require('./../server/higher.js');
 
 const resolvers = {};
-
-//const pubsub = new PubSub();
-
 resolvers.Query = {};
 resolvers.Mutation = {};
 resolvers.Topic = {};
 resolvers.User = {};
-//resolvers.Subscription = {};
+
+const directiveResolvers = {
+	live: (resolve, source, args, context, info) => {
+		return resolve().then((result) => {
+			console.log(result);
+			io.sockets.emit('mutatedData', result);
+			return result;
+		});
+	},
+};
 
 resolvers.Query.users = () => {
 	return Users.find({}, (err) => {
@@ -47,6 +53,16 @@ resolvers.Query.getAllTopics = () => {
 	});
 }
 
+resolvers.Query.getAllComments = () => {
+	return Comments.find({}, (err) => {
+		if (err) throw err;
+	}).then((result) => {
+		return result;
+	}).catch((err) => {
+		console.log(err);
+	});
+}
+
 resolvers.Query.getASingleComment = (text) => {
 	return Comments.findOne(text, (err) => {
 		if (err) throw err;
@@ -58,8 +74,8 @@ resolvers.Query.getASingleComment = (text) => {
 }
 
 resolvers.Topic.comments = (topic) => {
-	let theTopic = topic.topic;
-	return Comments.find({topic: theTopic}, (err) => {
+	let topicId = topic._id;
+	return Comments.find({topicId: topicId}, (err) => {
 		if (err) throw err;
 	}).then((result) => {
 		return result;
@@ -67,7 +83,6 @@ resolvers.Topic.comments = (topic) => {
 		console.log(err);
 	})
 }
-
 
 resolvers.User.comments = (author) => {
 	let theAuthor = author.username;
@@ -82,7 +97,6 @@ resolvers.User.comments = (author) => {
 
 resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
 	return Users.create(usernameAndPassWord).then((result) => {
-		// pubsub.publish('addAnotherUser', {addUser: result});
 		return result;
 	});
 }
@@ -114,13 +128,17 @@ resolvers.Mutation.addComment = (_, commentObj) => {
 	});
 }
 
-// resolvers.Subscription = {
-// 	addUser: {
-// 		subscribe: () => {
-// 			return pubsub.asyncIterator('addAnotherUser');
-// 		}
-// 	}
-// }
+resolvers.Mutation.increaseLikes = (_, original) => {
+	return Comments.findOne({_id: original._id}).then((result) => {
+		let updated = result;
+		updated.netScore += 1;
+		return Comments.update({_id: original._id}, updated).then((result) => {
+			return updated;
+		});
+	});
+}
+
+
 
 
 
@@ -137,4 +155,4 @@ resolvers.Mutation.addComment = (_, commentObj) => {
 
 
 
-module.exports = resolvers;
+module.exports = {resolvers, directiveResolvers};
