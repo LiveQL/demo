@@ -10,15 +10,6 @@ class RecievedData extends React.Component {
 				return (
 					<div className='topic'>
 						<li key={topic}>{topic}</li>
-						<ul key={comments}>{comments.map(({author, topic, text}, ind) => {
-							return (
-								<div className='topic'>
-									<li key={author}>Author: {author}</li>
-									<li key={topic}>Topic: {topic}</li>
-									<li key={text}>Text: {text}</li>
-								</div>
-							);
-						})}</ul>
 					</div>
 				);
 			})

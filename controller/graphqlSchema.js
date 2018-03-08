@@ -12,6 +12,7 @@ const schema = `
     getAllTopics: [Topic]
     getAllComments: [Comment]
     getASingleComment(text: String): Comment
+    getASingleTopic(id: String!): Topic
   }
   type User {
     username: String
@@ -33,7 +34,7 @@ const schema = `
   type Mutation {
     addTopic(topic: String ): Topic
     addComment(author: String, topicId: String, text: String, netScore: Int): Comment
-    addUser(username: String, password: String): User @live
+    addUser(username: String, password: String): User
     updatePassword(username: String, newPassword: String): User
     deleteUser(username: String, password: String): User
     increaseLikes(_id: String): Comment

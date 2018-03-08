@@ -22,7 +22,12 @@ const schema = makeExecutableSchema({
 app.use('*', cors({ origin: 'http://localhost:8080' }));
 
 // The GraphQL endpoint
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
+app.use('/graphql', bodyParser.json(), bodyParser.urlencoded({extended: true}), graphqlExpress({ schema }));
+
+// app.post('/graphql', bodyParser.json(), graphqlExpress({ schema }), (req, res) => {
+// 	console.log('got here');
+// 	res.send('fuck yeah');
+// });
 
 
 app.use('/graphiql', graphiqlExpress({
