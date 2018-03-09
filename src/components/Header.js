@@ -4,7 +4,7 @@ class Header extends Component {
 	render() {
 		return ( 
 		<div className="header">
-			<h1>Rest In Peace Rest API's...It's GraphQL's time to Crud</h1>
+			<h1>LiveQL Demo</h1>
 		</div>
 		);
 	}

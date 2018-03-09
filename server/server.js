@@ -7,28 +7,24 @@ const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const typeDefs = require('./../controller/graphqlSchema.js');
-const resolvers = require('./../controller/resolvers.js');
+const { resolvers, directiveResolvers }  = require('./../controller/resolvers.js');
 
 // Put together a schema
 const schema = makeExecutableSchema({
 	typeDefs,
 	resolvers,
+	directiveResolvers
 });
 
 app.use('*', cors({ origin: 'http://localhost:8080' }));
 
-//loads bundle
-app.use(express.static(__dirname + './..public'));
-
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
-});
-
 // The GraphQL endpoint
-app.use('/graphql', bodyParser.json(), graphqlExpress({ schema }));
+app.use('/graphql', bodyParser.json(), bodyParser.urlencoded({extended: true}), graphqlExpress({ schema }));
+
+// app.post('/graphql', bodyParser.json(), graphqlExpress({ schema }), (req, res) => {
+// 	console.log('got here');
+// 	res.send('fuck yeah');
+// });
 
 
 app.use('/', graphiqlExpress({
@@ -36,12 +32,12 @@ app.use('/', graphiqlExpress({
 }));
 
 
-// Wrap the Express server
-//const ws = createServer(app);
 server.listen(3000, () => {
 	console.log('GraphQL Server is now running on http://localhost:3000');
 });
 
-// websocket.on('connection', (socket) => {
-// 	console.log('A client just joined on ', socket.id );
-// });
+//loads bundle
+app.use(express.static(__dirname + './..public'));
+
+
+
