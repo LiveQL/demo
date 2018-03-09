@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 require('isomorphic-fetch');
-//import SocketIOClient from 'socket.io-client';
+import SocketIOClient from 'socket.io-client';
+
+//what we need to do it update the state on the graphql calls- every mutation updates state and
+//whatrennders to the dom is dependent on simple state conditional logic,
+//right now our 'consoles' from the live directive cannot update state, thus cannot change the net score on page.
 
 class Container extends React.Component {
 	constructor() {
@@ -17,6 +21,7 @@ class Container extends React.Component {
 		this.createTopic = this.createTopic.bind(this);
 		this.fetchTopic = this.fetchTopic.bind(this);
 		this.commentMutation = this.commentMutation.bind(this);
+		this.alterStateAfterMutation = this.alterStateAfterMutation.bind(this);
 	}
 
 	createTopic(e) {
@@ -34,28 +39,30 @@ class Container extends React.Component {
 	  this.setState({value: e.target.value})
   }
 
+	alterStateAfterMutation(mutationType, newState) {
+	  this.setState(newState);
+  }
+
   like(e) {
 	  e.preventDefault();
-	  const _id = e.target.id;
+    const _id = e.target.id;
     this.props.increaseLikes({
       variables: { _id },
     })
       .then(({ data }) => {
-        console.log('data', data)
+        //console.log('data', data)
       }).catch(err => console.log('nope', err))
   }
 
 	commentMutation(e) {
 	  e.preventDefault();
 	  const { _id } = this.state.onComment.getASingleTopic;
-	  console.log(this.state.value, _id)
     this.props.addComment({
-      variables: { topicId: _id, author: 'Gravitar', text: this.state.value },
+      variables: { topicId: _id, author: 'xavyr', text: this.state.value },
       // refetchQueries: [{ query: Topics }]
     })
         .then(({ data }) => {
           this.setState({value : ''});
-          console.log('data', data)
         }).catch(err => console.log('nope', err))
   }
 
@@ -84,19 +91,40 @@ class Container extends React.Component {
     })
         .then(res => res.json())
         .then((res) => {
-          this.setState({onComment: res.data});
+        	// i set the state to have list of current comments for easy grab when we fire a socket
+	        let copy = this.state;
+	        copy.onComment = res.data;
+          this.setState(copy);
 	      })
   }
 
 	// Lifecycle Methods
 	componentWillMount() {
-		console.log('here');
-
+		let that = this;
 		//web socket on mount stuff
-		// const socket = SocketIOClient.connect('http://localhost:3000');
-		// socket.on('news', function (data) {
-		//  socket.emit('my other event', { my: 'data' });
-		// });
+		const socket = SocketIOClient.connect('http://localhost:3000');
+		socket.on('mutatedData', function (data) {
+		 console.log('this is the data from socket', data);
+		 //if is when u increased likes, and the backend shot back 1 at the minimum
+		 if (data.netScore !== 0) {
+			 let stateCopy =  Object.assign({}, that.state);
+			 let allComments = stateCopy.onComment.getASingleTopic.comments;
+			 let changedComments = allComments.map(comment => {
+			 	if (comment._id === data._id) {
+			     return data;
+			 	} else {
+			     return comment;
+			 	}
+			 })
+			 stateCopy.onComment.getASingleTopic.comments = changedComments;
+			 that.alterStateAfterMutation('addedLike', stateCopy);
+		 } else if (data.netScore === 0) {
+			 let stateCopy =  Object.assign({}, that.state);
+			 stateCopy.onComment.getASingleTopic.comments.push(data);
+			 that.alterStateAfterMutation('addedMessage', stateCopy);
+		 }
+
+		});
 	}
 
 
@@ -111,7 +139,8 @@ class Container extends React.Component {
         const topicItems = getAllTopics.map(({_id, topic}) => (
             <div>
               <button onClick={this.fetchTopic} id={_id}>{topic}</button>
-              <br/><br/><br/></div>
+              <br/><br/><br/>
+            </div>
         ))
         return (
             <div>
@@ -122,11 +151,11 @@ class Container extends React.Component {
             </div>
         )
       } else if (this.state.onComment) {
-        const comments = this.state.onComment.getASingleTopic.comments.map(({_id, text, author, netScore}) => (
+      	let stateCopy = this.state.onComment.getASingleTopic.comments.slice();
+        const comments = stateCopy.map(({_id, text, author, netScore}) => (
             <div>
               {author}: {text} <button id={_id} onClick={this.like}>Like</button> {netScore}
               <br/><br/>
-
             </div>
         ));
         return (
