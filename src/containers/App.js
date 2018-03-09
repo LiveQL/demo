@@ -5,20 +5,21 @@ require('isomorphic-fetch');
 
 
 //import SocketIOClient from 'socket.io-client';
-import Header from "./../components/Header.js";
-import Read from "./../components/Read.js";
-import RecievedData from "./../components/RecievedData.js";
+
 
 
 class Container extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			topics: null,
+      onComment: false,
+      value: '',
 		};
 
-
+    this.handleChange = this.handleChange.bind(this);
 		this.createTopic = this.createTopic.bind(this);
+		this.fetchTopic = this.fetchTopic.bind(this);
+		this.commentMutation = this.commentMutation.bind(this);
 	}
 
 	createTopic(e) {
@@ -33,10 +34,52 @@ class Container extends React.Component {
 
 	}
 
+	handleChange(e) {
+	  this.setState({value: e.target.value})
+  }
+
+	commentMutation(e) {
+	  e.preventDefault();
+	  const { _id } = this.state.onComment.getASingleTopic;
+	  console.log(this.state.value, _id)
+    this.props.addComment({
+      variables: { topicId: _id, author: 'Gravitar', text: this.state.value },
+      // refetchQueries: [{ query: Topics }]
+    })
+        .then(({ data }) => {
+          this.setState({value : ''});
+          console.log('data', data)
+        }).catch(err => console.log('nope', err))
+  }
+
 	fetchTopic(e) {
 		e.preventDefault();
 
-	}
+    const id = e.target.id;
+
+    const query = `
+        getASingleTopic(id: "${id}") {
+          _id
+          topic
+          comments {
+            _id
+            author
+            topicId
+            text
+            netScore
+          }
+        }`;
+
+    fetch('http://localhost:3000/graphql', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query: `{ ${query} }`}),
+    })
+        .then(res => res.json())
+        .then((res) => {
+          this.setState({onComment: res.data});
+	      })
+  }
 
 	// Lifecycle Methods
 	componentWillMount() {
@@ -51,81 +94,75 @@ class Container extends React.Component {
 
 
 	render() {
-		const { data: { loading, error, getAllTopics } } = this.props;
-		if (loading) {
-			return <p>Loading...</p>;
-		} else if (error) {
-			return <p>Error!</p>;
-		} else {
-			if (false) { //!this.state.topics
-				const topicItems = getAllTopics.map(({_id, topic, comments}) => (
-					<div><button topicId={_id}>{topic}</button><br/><br/><br/></div>
-				))
-				return (
-					<div>
-						<h1>LiveQL Demo</h1>
-						<ul>
-							{topicItems}
-						</ul>
-					</div>
-				)
-			} else {
-				console.log('gonna do the axios request');
-				const query = `
-											getASingleTopic(id: "5aa0852bb6968018e3a1fa00") {
-											_id
-											topic
-											comments {
-											_id
-											author
-											topicId
-											text
-											netScore
-											}
-											}`
-
-				fetch('http://localhost:3000/graphql', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ query: `{ ${query} }` }),
-				})
-					.then(res => res.json())
-					.then((res) => {
-						console.log(res.data);
-						const comments = res.data.getASingleTopic.comments.map(({text}) => (
-							<div><button>{text}</button><br/><br/><br/></div>
-						))
-						return (
-							<div>
-								<h1>LiveQL Demo</h1>
-								<ul>
-									{comments}
-								</ul>
-							</div>
-						)
-					});
-			}
-		}
-	}
-}
-
-const getAllTopics = gql`
-query {
-  getAllTopics {
-   _id
-    topic
+    const {data: {loading, error, getAllTopics}} = this.props;
+    if (loading) {
+      return <p>Loading...</p>;
+    } else if (error) {
+      return <p>Error!</p>;
+    } else {
+      if (!this.state.onComment) { //!this.state.topics
+        const topicItems = getAllTopics.map(({_id, topic, comments}) => (
+            <div>
+              <button onClick={this.fetchTopic} id={_id}>{topic}</button>
+              <br/><br/><br/></div>
+        ))
+        return (
+            <div>
+              <h1>LiveQL Demo</h1>
+              <ul>
+                {topicItems}
+              </ul>
+            </div>
+        )
+      } else if (this.state.onComment) {
+        const comments = this.state.onComment.getASingleTopic.comments.map(({text, author}) => (
+            <div>
+              {author}: {text}
+              <br/><br/>
+            </div>
+        ));
+        return (
+          <div>
+            <h1>{this.state.onComment.getASingleTopic.topic}</h1>
+            <ul>
+              {comments}
+            </ul>
+            <form onSubmit={this.commentMutation}>
+              <input onChange={this.handleChange} value={this.state.value} placeholder='Add Comment'/>
+            </form>
+          </div>
+        )
+        };
+    }
   }
 }
-`;
 
-// const statefulComp = compose(
-// 	graphql(addTopic, { name: 'addTopic' }),
-// 	graphql(addComment, { name: 'addComment' }),
-// 	graphql(Topics)
-// )(Container);
+
+
+const getAllTopics = gql`
+  query {
+    getAllTopics {
+     _id
+      topic
+    }
+  }
+  `;
+
+const addComment = gql`
+  mutation addComment($author: String!, $topicId: String!, $text: String!) {
+    addComment(author: $author, topicId: $topicId, text: $text, netScore: 0) {
+      topicId
+      author
+      text
+      netScore
+    }
+  }
+  `;
+
 
 const statefulComp = compose(
-	graphql(getAllTopics),
-)(Container);
+    graphql(getAllTopics),
+    graphql(addComment, { name: 'addComment' })
+  )(Container);
 
 export default statefulComp;
