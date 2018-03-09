@@ -2,11 +2,7 @@ import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 require('isomorphic-fetch');
-
-
 //import SocketIOClient from 'socket.io-client';
-
-
 
 class Container extends React.Component {
 	constructor() {
@@ -16,6 +12,7 @@ class Container extends React.Component {
       value: '',
 		};
 
+		this.like = this.like.bind(this);
     this.handleChange = this.handleChange.bind(this);
 		this.createTopic = this.createTopic.bind(this);
 		this.fetchTopic = this.fetchTopic.bind(this);
@@ -31,11 +28,21 @@ class Container extends React.Component {
 			.then(({ data }) => {
 				document.getElementById('topic').value = '';
 			}).catch(err => console.log('nope', err))
-
 	}
 
 	handleChange(e) {
 	  this.setState({value: e.target.value})
+  }
+
+  like(e) {
+	  e.preventDefault();
+	  const _id = e.target.id;
+    this.props.increaseLikes({
+      variables: { _id },
+    })
+      .then(({ data }) => {
+        console.log('data', data)
+      }).catch(err => console.log('nope', err))
   }
 
 	commentMutation(e) {
@@ -101,7 +108,7 @@ class Container extends React.Component {
       return <p>Error!</p>;
     } else {
       if (!this.state.onComment) { //!this.state.topics
-        const topicItems = getAllTopics.map(({_id, topic, comments}) => (
+        const topicItems = getAllTopics.map(({_id, topic}) => (
             <div>
               <button onClick={this.fetchTopic} id={_id}>{topic}</button>
               <br/><br/><br/></div>
@@ -115,10 +122,11 @@ class Container extends React.Component {
             </div>
         )
       } else if (this.state.onComment) {
-        const comments = this.state.onComment.getASingleTopic.comments.map(({text, author}) => (
+        const comments = this.state.onComment.getASingleTopic.comments.map(({_id, text, author, netScore}) => (
             <div>
-              {author}: {text}
+              {author}: {text} <button id={_id} onClick={this.like}>Like</button> {netScore}
               <br/><br/>
+
             </div>
         ));
         return (
@@ -160,10 +168,23 @@ const addComment = gql`
   }
   `;
 
+const increaseLikes = gql`
+  mutation increaseLikes($_id: String!) {
+    increaseLikes(_id: $_id) {
+      topicId
+      _id
+      author
+      text
+      netScore
+    }
+  }
+  `;
+
 
 const statefulComp = compose(
     graphql(getAllTopics),
-    graphql(addComment, { name: 'addComment' })
+    graphql(addComment, { name: 'addComment' }),
+    graphql(increaseLikes, { name: 'increaseLikes' })
   )(Container);
 
 export default statefulComp;
