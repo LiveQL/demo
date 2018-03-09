@@ -110,23 +110,23 @@ class Container extends React.Component {
       if (!this.state.onComment) { //!this.state.topics
         const topicItems = getAllTopics.map(({_id, topic}) => (
             <div>
-              <button onClick={this.fetchTopic} id={_id}>{topic}</button>
+              <button  onClick={this.fetchTopic} id={_id}>{topic}</button>
               <br/><br/><br/></div>
         ))
         return (
             <div>
               <h1>LiveQL Demo</h1>
-              <ul>
                 {topicItems}
-              </ul>
             </div>
         )
       } else if (this.state.onComment) {
         const comments = this.state.onComment.getASingleTopic.comments.map(({_id, text, author, netScore}) => (
-            <div>
-              {author}: {text} <button id={_id} onClick={this.like}>Like</button> {netScore}
+            <div className="comments">
+							<div id='author'>
+							{author}:  
+							</div>
+							{text} <button id={_id} onClick={this.like}>Like</button> {netScore}
               <br/><br/>
-
             </div>
         ));
         return (
