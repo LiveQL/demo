@@ -123,6 +123,7 @@ class Container extends React.Component {
         ));
         return (
           <div>
+            <button onClick={() => this.setState({ onComment: false })} value='Home'>Home</button>
             <h1>{this.state.onComment.getASingleTopic.topic}</h1>
             <ul>
               {comments}
