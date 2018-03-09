@@ -1,112 +1,168 @@
 import React, { Component } from 'react';
+import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
-import { ApolloClient } from 'apollo-client/index'
-import { InMemoryCache } from 'apollo-cache-inmemory/lib/index'
-import { split } from 'apollo-link';
-import { HttpLink } from 'apollo-link-http';
-import { getMainDefinition } from 'apollo-utilities';
-import SocketIOClient from 'socket.io-client';
-import Header from "./../components/Header.js";
-import Read from "./../components/Read.js";
-// import RecievedData from "./../components/RecievedData.js";
-import { Switch, Route } from 'react-router-dom'
-import ReceivedData from "../components/RecievedData";
+require('isomorphic-fetch');
 
-const httpLink = new HttpLink({
-	uri: 'http://localhost:3000/graphql'
-});
 
-const client = new ApolloClient({
-	link: httpLink,
-	cache: new InMemoryCache()
-});
+//import SocketIOClient from 'socket.io-client';
 
-const queries = {};
 
-queries.getAllTopics = gql`
-query {
-	getAllTopics {
-    topic
-    comments {
-      author
-      topic
-      text
-      netScore
-    }
-  }
-}
-`;
-queries.getAllUsers = gql`
-query {
-	users {
-    username
-    password
-    comments {
-      author
-      topic
-      text
-      netScore
-    }
-  }
-}
-`;
 
-//Lead Component
-class App extends Component {
+class Container extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			'topics': null,
-			'users': null
+      onComment: false,
+      value: '',
 		};
 
-		//socket stuff
-		this.socket = SocketIOClient('http://localhost:3000');
-
-		//all function bindings
-		this.getAllTopics = this.getAllTopics.bind(this);
-		this.getAllUsers = this.getAllUsers.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+		this.createTopic = this.createTopic.bind(this);
+		this.fetchTopic = this.fetchTopic.bind(this);
+		this.commentMutation = this.commentMutation.bind(this);
 	}
+
+	createTopic(e) {
+		e.preventDefault();
+		this.props.addTopic({
+			variables: { author: 'Michael', topic: e.target.topic.value},
+			refetchQueries: [{ query: Topics }]
+		})
+			.then(({ data }) => {
+				document.getElementById('topic').value = '';
+			}).catch(err => console.log('nope', err))
+
+	}
+
+	handleChange(e) {
+	  this.setState({value: e.target.value})
+  }
+
+	commentMutation(e) {
+	  e.preventDefault();
+	  const { _id } = this.state.onComment.getASingleTopic;
+	  console.log(this.state.value, _id)
+    this.props.addComment({
+      variables: { topicId: _id, author: 'Gravitar', text: this.state.value },
+      // refetchQueries: [{ query: Topics }]
+    })
+        .then(({ data }) => {
+          this.setState({value : ''});
+          console.log('data', data)
+        }).catch(err => console.log('nope', err))
+  }
+
+	fetchTopic(e) {
+		e.preventDefault();
+
+    const id = e.target.id;
+
+    const query = `
+        getASingleTopic(id: "${id}") {
+          _id
+          topic
+          comments {
+            _id
+            author
+            topicId
+            text
+            netScore
+          }
+        }`;
+
+    fetch('http://localhost:3000/graphql', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({query: `{ ${query} }`}),
+    })
+        .then(res => res.json())
+        .then((res) => {
+          this.setState({onComment: res.data});
+	      })
+  }
 
 	// Lifecycle Methods
 	componentWillMount() {
-		const socket = SocketIOClient.connect('http://localhost:3000');
-		socket.on('news', function (data) {
-			socket.emit('my other event', { my: 'data' });
-		});
-	}
+		console.log('here');
 
-	//list of functions for components
-	getAllTopics(event) {
-		client.query({ query: queries.getAllTopics }).then((result) => {
-			let copy = this.state;
-			copy.topics = result.data.getAllTopics;
-			this.setState(copy);
-			return 0;
-		});
-	}
-	getAllUsers(event) {
-		client.query({ query: queries.getAllUsers }).then((result) => {
-			let copy = this.state;
-			copy.users = result.data.users;
-			this.setState(copy);
-			return 1;
-		});
+		//web socket on mount stuff
+		// const socket = SocketIOClient.connect('http://localhost:3000');
+		// socket.on('news', function (data) {
+		//  socket.emit('my other event', { my: 'data' });
+		// });
 	}
 
 
 	render() {
-	// 	const check = (this.state.topics) ?  />
-	// 	: <RecievedData topics={this.state.topics} users={this.state.users} />;
-		return (
-			<div className='login-component'>
-				<Header />
-        <Read getAllTopics={this.getAllTopics} getAllUsers={this.getAllUsers} />
-        <ReceivedData topics={this.state.topics} users={this.state.users} />
-
-			</div>
-		)
-	}
+    const {data: {loading, error, getAllTopics}} = this.props;
+    if (loading) {
+      return <p>Loading...</p>;
+    } else if (error) {
+      return <p>Error!</p>;
+    } else {
+      if (!this.state.onComment) { //!this.state.topics
+        const topicItems = getAllTopics.map(({_id, topic, comments}) => (
+            <div>
+              <button onClick={this.fetchTopic} id={_id}>{topic}</button>
+              <br/><br/><br/></div>
+        ))
+        return (
+            <div>
+              <h1>LiveQL Demo</h1>
+              <ul>
+                {topicItems}
+              </ul>
+            </div>
+        )
+      } else if (this.state.onComment) {
+        const comments = this.state.onComment.getASingleTopic.comments.map(({text, author}) => (
+            <div>
+              {author}: {text}
+              <br/><br/>
+            </div>
+        ));
+        return (
+          <div>
+            <h1>{this.state.onComment.getASingleTopic.topic}</h1>
+            <ul>
+              {comments}
+            </ul>
+            <form onSubmit={this.commentMutation}>
+              <input onChange={this.handleChange} value={this.state.value} placeholder='Add Comment'/>
+            </form>
+          </div>
+        )
+        };
+    }
+  }
 }
 
-module.exports = { app: App, apolloClient: client}
+
+
+const getAllTopics = gql`
+  query {
+    getAllTopics {
+     _id
+      topic
+    }
+  }
+  `;
+
+const addComment = gql`
+  mutation addComment($author: String!, $topicId: String!, $text: String!) {
+    addComment(author: $author, topicId: $topicId, text: $text, netScore: 0) {
+      topicId
+      author
+      text
+      netScore
+    }
+  }
+  `;
+
+
+const statefulComp = compose(
+    graphql(getAllTopics),
+    graphql(addComment, { name: 'addComment' })
+  )(Container);
+
+export default statefulComp;
