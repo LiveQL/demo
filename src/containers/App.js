@@ -138,7 +138,7 @@ class Container extends React.Component {
       if (!this.state.onComment) { //!this.state.topics
         const topicItems = getAllTopics.map(({_id, topic}) => (
             <div>
-              <button onClick={this.fetchTopic} id={_id}>{topic}</button>
+              <button onClick={this.fetchTopic} className={'topic' + _id} id={_id}>{topic}</button>
               <br/><br/><br/>
             </div>
         ))
@@ -154,7 +154,7 @@ class Container extends React.Component {
       	let stateCopy = this.state.onComment.getASingleTopic.comments.slice();
         const comments = stateCopy.map(({_id, text, author, netScore}) => (
             <div>
-              {author}: {text} <button id={_id} onClick={this.like}>Like</button> {netScore}
+              {author}: {text} <button className={'likeB' + _id} id={_id} onClick={this.like}>Like</button> {netScore}
               <br/><br/>
             </div>
         ));
