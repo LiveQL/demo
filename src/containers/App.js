@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 require('isomorphic-fetch');
-import { socket, connectionFunctions } from './socketConnection';
+import liveClient from './socketConnection';
 //import SocketIOClient from 'socket.io-client';
 
 //what we need to do it update the state on the graphql calls- every mutation updates state and
@@ -126,12 +126,11 @@ class Container extends React.Component {
   }
 
 	basketballChannel(socketHandler) {
-		connectionFunctions.on(socketHandler, this.renderDataToScreen);
+		liveClient.on(socketHandler, this.renderDataToScreen);
 	}
 
 	cricketChannel(socketHandler) {
-		console.log('sh', socketHandler);
-		connectionFunctions.on('second', function (data) {
+		liveClient.on('second', function (data) {
 			console.log(data);
 		});
 
@@ -139,7 +138,7 @@ class Container extends React.Component {
 
 	// Lifecycle Methods
 	componentDidMount() {
-
+		liveClient.connect('http://localhost:3000');
 	}
 
 
