@@ -3,7 +3,9 @@ const Users = require('../model/userSchema.js');
 const Topics = require('../model/topicSchema.js');
 const Comments = require('../model/commentsSchema.js');
 
-const { io } = require('./../server/higher.js');
+const io = require('./../server/higher.js').instatiateIO();
+
+
 
 const resolvers = {};
 resolvers.Query = {};
