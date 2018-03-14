@@ -16,6 +16,7 @@ const directiveResolvers = {
 		return resolve().then((result) => {
 			console.log(result);
 			io.sockets.emit('mutatedData', result);
+			io.sockets.emit('second', 'hello');
 			return result;
 		});
 	},

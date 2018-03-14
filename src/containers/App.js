@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { graphql, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 require('isomorphic-fetch');
-import SocketIOClient from 'socket.io-client';
+import { socket, connectionFunctions } from './socketConnection';
+//import SocketIOClient from 'socket.io-client';
 
 //what we need to do it update the state on the graphql calls- every mutation updates state and
 //whatrennders to the dom is dependent on simple state conditional logic,
@@ -14,6 +15,7 @@ class Container extends React.Component {
 		this.state = {
       onComment: false,
       value: '',
+			socketHandle: null
 		};
 
 		this.like = this.like.bind(this);
@@ -22,6 +24,9 @@ class Container extends React.Component {
 		this.fetchTopic = this.fetchTopic.bind(this);
 		this.commentMutation = this.commentMutation.bind(this);
 		this.alterStateAfterMutation = this.alterStateAfterMutation.bind(this);
+		this.basketballChannel = this.basketballChannel.bind(this);
+		this.renderDataToScreen = this.renderDataToScreen.bind(this);
+		this.cricketChannel = this.cricketChannel.bind(this);
 	}
 
 	createTopic(e) {
@@ -94,37 +99,47 @@ class Container extends React.Component {
         	// i set the state to have list of current comments for easy grab when we fire a socket
 	        let copy = this.state;
 	        copy.onComment = res.data;
+	        //copy.socketHandle = 'mutatedData';
           this.setState(copy);
+	        this.basketballChannel('mutatedData', res.data);
 	      })
   }
 
-	// Lifecycle Methods
-	componentWillMount() {
-		let that = this;
-		//web socket on mount stuff
-		const socket = SocketIOClient.connect('http://localhost:3000');
-		socket.on('mutatedData', function (data) {
-		 console.log('this is the data from socket', data);
-		 //if is when u increased likes, and the backend shot back 1 at the minimum
-		 if (data.netScore !== 0) {
-			 let stateCopy =  Object.assign({}, that.state);
-			 let allComments = stateCopy.onComment.getASingleTopic.comments;
-			 let changedComments = allComments.map(comment => {
-			 	if (comment._id === data._id) {
-			     return data;
-			 	} else {
-			     return comment;
-			 	}
-			 })
-			 stateCopy.onComment.getASingleTopic.comments = changedComments;
-			 that.alterStateAfterMutation('addedLike', stateCopy);
-		 } else if (data.netScore === 0) {
-			 let stateCopy =  Object.assign({}, that.state);
-			 stateCopy.onComment.getASingleTopic.comments.push(data);
-			 that.alterStateAfterMutation('addedMessage', stateCopy);
-		 }
+  renderDataToScreen(data) {
+	  if (data.netScore !== 0) {
+		  let stateCopy =  Object.assign({}, this.state);
+		  let allComments = stateCopy.onComment.getASingleTopic.comments;
+		  let changedComments = allComments.map(comment => {
+			  if (comment._id === data._id) {
+				  return data;
+			  } else {
+				  return comment;
+			  }
+		  })
+		  stateCopy.onComment.getASingleTopic.comments = changedComments;
+		  this.alterStateAfterMutation('addedLike', stateCopy);
+	  } else if (data.netScore === 0) {
+		  let stateCopy =  Object.assign({}, this.state);
+		  stateCopy.onComment.getASingleTopic.comments.push(data);
+		  this.alterStateAfterMutation('addedMessage', stateCopy);
+	  }
+  }
 
+	basketballChannel(socketHandler) {
+		connectionFunctions.on(socketHandler, this.renderDataToScreen);
+	}
+
+	cricketChannel(socketHandler) {
+		console.log('sh', socketHandler);
+		connectionFunctions.on('second', function (data) {
+			console.log(data);
 		});
+
+	}
+
+	// Lifecycle Methods
+	componentDidMount() {
+
 	}
 
 
@@ -164,6 +179,7 @@ class Container extends React.Component {
             <h1>{this.state.onComment.getASingleTopic.topic}</h1>
             <ul>
               {comments}
+	            <button onClick={this.cricketChannel}>testF</button>
             </ul>
             <form onSubmit={this.commentMutation}>
               <input onChange={this.handleChange} value={this.state.value} placeholder='Add Comment'/>
