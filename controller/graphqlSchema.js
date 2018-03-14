@@ -32,12 +32,12 @@ const schema = `
     netScore: Int
   }
   type Mutation {
-    addTopic(topic: String ): Topic
-    addComment(author: String!, topicId: String!, text: String!, netScore: Int): Comment
+    addTopic(topic: String ): Topic 
+    addComment(author: String!, topicId: String!, text: String!, netScore: Int): Comment @live
     addUser(username: String, password: String): User
     updatePassword(username: String, newPassword: String): User
     deleteUser(username: String, password: String): User
-    increaseLikes(_id: String): Comment
+    increaseLikes(_id: String): Comment @live
   }
   schema {
     query: Query

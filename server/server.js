@@ -1,8 +1,9 @@
-const { makeExecutableSchema } = require('graphql-tools');
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const io = require('./higher.js').initialize(server);
+const { makeExecutableSchema } = require('graphql-tools');
+
 const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -17,6 +18,11 @@ const schema = makeExecutableSchema({
 });
 
 app.use('*', cors({ origin: 'http://localhost:8080' }));
+
+app.use(function (res, res, next){
+	console.log('herereere');
+	next();
+});
 
 // The GraphQL endpoint
 app.use('/graphql', bodyParser.json(), bodyParser.urlencoded({extended: true}), graphqlExpress({ schema }));
