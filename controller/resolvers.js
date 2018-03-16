@@ -57,7 +57,6 @@ resolvers.Query.getAllTopics = () => {
 }
 
 resolvers.Query.getASingleTopic = (_, paramObj) => {
-	console.log('fuck yeah we are here');
 	let id = paramObj.id;
 	return Topics.findOne({_id: id}, (err) => {
 		if (err) throw err;

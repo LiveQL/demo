@@ -1,14 +1,20 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
-const io = require('./higher.js').initialize(server);
+require('./higher').initialize(server);
+const io = require('./higher').io
 const { makeExecutableSchema } = require('graphql-tools');
-
-const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
-const bodyParser = require('body-parser');
+//const { server, io } = require('./higher.js');
 const cors = require('cors');
+const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
+const { graphql } = require('graphql');
+
+
+const bodyParser = require('body-parser');
+
 const typeDefs = require('./../controller/graphqlSchema.js');
 const { resolvers, directiveResolvers }  = require('./../controller/resolvers.js');
+const rdl = require('./rdl');
 
 // Put together a schema
 const schema = makeExecutableSchema({
@@ -18,22 +24,28 @@ const schema = makeExecutableSchema({
 });
 
 app.use('*', cors({ origin: 'http://localhost:8080' }));
-
-app.use(function (res, res, next){
-	console.log('herereere');
-	next();
-});
+app.use('*', bodyParser.json());
+app.use('*', bodyParser.urlencoded({extended: true}));
 
 // The GraphQL endpoint
-app.use('/graphql', bodyParser.json(), bodyParser.urlencoded({extended: true}), graphqlExpress({ schema }));
+app.use('/graphql', graphqlExpress({
+	schema: schema,
+	formatResponse(res) {
+		for (hashKey in rdl.queue) {
+			const query = async (str, hashKey) => {
+				graphql(schema, str)
+					.then(data => {
+						io.sockets.emit(hashKey, data)
+					})
+			}
+			query(rdl.subscriptions[hashKey], hashKey)
+		}
+		return res;
+	}
+}));
 
-// app.post('/graphql', bodyParser.json(), graphqlExpress({ schema }), (req, res) => {
-// 	console.log('got here');
-// 	res.send('fuck yeah');
-// });
 
-
-app.use('/', graphiqlExpress({
+app.use('/graphiql', graphiqlExpress({
 	endpointURL: '/graphql',
 }));
 
