@@ -1,6 +1,7 @@
 
 //const server = require('http').Server(app);
 const sio = require('socket.io');
+const rdl = require('./rdl');
 
 const liveServer = {};
 
@@ -16,7 +17,9 @@ liveServer.initialize =  (server) => {
 
 	liveServer.io.on('connection', function (socket) {
 		socket.on('unload', function (data) {
-			console.log(data);
+			data.forEach(handle => {
+				rdl.subscriptions[handle].subscribers--;
+			});
 		});
 	});
 }

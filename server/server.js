@@ -32,8 +32,8 @@ app.use('/graphql', graphqlExpress({
 	schema: schema,
 	formatResponse(res) {
 		for (hashKey in rdl.queue) {
-			const query = async (str, hashKey) => {
-				graphql(schema, str)
+			const query = async (rdlHash, hashKey) => {
+				graphql(schema, rdlHash.query)
 					.then(data => {
 						io.sockets.emit(hashKey, data)
 					})
