@@ -1,20 +1,20 @@
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
-require('./higher').initialize(server);
-const io = require('./higher').io
+//require('./LiveSocketServer').initialize(server);
+const liveSocketServer = require('./LiveSocketServer');
+liveSocketServer.initialize(server);
 const { makeExecutableSchema } = require('graphql-tools');
 //const { server, io } = require('./higher.js');
 const cors = require('cors');
 const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
-const { graphql } = require('graphql');
+
 
 
 const bodyParser = require('body-parser');
 
 const typeDefs = require('./../controller/graphqlSchema.js');
 const { resolvers, directiveResolvers }  = require('./../controller/resolvers.js');
-const rdl = require('./rdl');
 
 // Put together a schema
 const schema = makeExecutableSchema({
@@ -31,15 +31,9 @@ app.use('*', bodyParser.urlencoded({extended: true}));
 app.use('/graphql', graphqlExpress({
 	schema: schema,
 	formatResponse(res) {
-		for (hashKey in rdl.queue) {
-			const query = async (rdlHash, hashKey) => {
-				graphql(schema, rdlHash.query)
-					.then(data => {
-						io.sockets.emit(hashKey, data)
-					})
-			}
-			query(rdl.subscriptions[hashKey], hashKey)
-		}
+		//developer must pass in our schema in order to emit as we
+		//loop through our rdl
+		liveSocketServer.emit(schema);
 		return res;
 	}
 }));
