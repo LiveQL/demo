@@ -4,10 +4,14 @@ const server = require('http').Server(app);
 require('./higher').initialize(server);
 const io = require('./higher').io
 const { makeExecutableSchema } = require('graphql-tools');
-
-const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
-const bodyParser = require('body-parser');
+//const { server, io } = require('./higher.js');
 const cors = require('cors');
+const { graphiqlExpress, graphqlExpress } = require('graphql-server-express');
+const { graphql } = require('graphql');
+
+
+const bodyParser = require('body-parser');
+
 const typeDefs = require('./../controller/graphqlSchema.js');
 const { resolvers, directiveResolvers }  = require('./../controller/resolvers.js');
 const rdl = require('./rdl');
@@ -37,11 +41,11 @@ app.use('/graphql', graphqlExpress({
 			query(rdl.subscriptions[hashKey], hashKey)
 		}
 		return res;
-		}
+	}
 }));
 
 
-app.use('/', graphiqlExpress({
+app.use('/graphiql', graphiqlExpress({
 	endpointURL: '/graphql',
 }));
 
