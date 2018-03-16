@@ -162,9 +162,7 @@ class Container extends React.Component {
         return (
             <div>
               <h1>LiveQL Demo</h1>
-              <ul>
                 {topicItems}
-              </ul>
             </div>
         )
       } else if (this.state.onComment) {
