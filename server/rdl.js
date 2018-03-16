@@ -20,7 +20,10 @@ RDL.subscriptions = {
 		query: "query { getAllComments {_id author topicId text netScore} }",
 		subscribers: 1
 	},
-	hashedTwoQuery: "query { getAllTopics { _id topic }}"
+	hashedTwoQuery: {
+		query: "query { getAllTopics { _id topic }}",
+		subscribers: 30
+	}
 };
 // This will be the notification queue. It stores the list of WebSocket
 // handle that need to be notified of changes. For now, we'll just rerun
