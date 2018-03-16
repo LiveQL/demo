@@ -24,8 +24,8 @@ class Container extends React.Component {
 		this.fetchTopic = this.fetchTopic.bind(this);
 		this.commentMutation = this.commentMutation.bind(this);
 		this.alterStateAfterMutation = this.alterStateAfterMutation.bind(this);
-		this.basketballChannel = this.basketballChannel.bind(this);
 		this.renderDataToScreen = this.renderDataToScreen.bind(this);
+		this.getAllTopics = this.getAllTopics.bind(this);
 		this.cricketChannel = this.cricketChannel.bind(this);
 	}
 
@@ -101,11 +101,17 @@ class Container extends React.Component {
 	        copy.onComment = res.data;
 	        //copy.socketHandle = 'mutatedData';
           this.setState(copy);
-	        this.basketballChannel('mutatedData', res.data);
+	        liveClient.on('hashedOneQuery', this.renderDataToScreen);
+	        liveClient.on('hashedTwoQuery', this.getAllTopics);
 	      })
   }
 
+  getAllTopics(data) {
+		console.log('getAll Topics... ', data);
+  }
+
   renderDataToScreen(data) {
+		console.log('inside render, working on lag', data);
 	  if (data.netScore !== 0) {
 		  let stateCopy =  Object.assign({}, this.state);
 		  let allComments = stateCopy.onComment.getASingleTopic.comments;
@@ -117,6 +123,7 @@ class Container extends React.Component {
 			  }
 		  })
 		  stateCopy.onComment.getASingleTopic.comments = changedComments;
+
 		  this.alterStateAfterMutation('addedLike', stateCopy);
 	  } else if (data.netScore === 0) {
 		  let stateCopy =  Object.assign({}, this.state);
@@ -125,12 +132,8 @@ class Container extends React.Component {
 	  }
   }
 
-	basketballChannel(socketHandler) {
-		liveClient.on(socketHandler, this.renderDataToScreen);
-	}
-
 	cricketChannel(socketHandler) {
-		liveClient.on('second', function (data) {
+		liveClient.on('hashedTwoQuery', function (data) {
 			console.log(data);
 		});
 
