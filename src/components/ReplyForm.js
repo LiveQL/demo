@@ -27,6 +27,12 @@ class ReplyForm extends React.Component {
           topicId
           text
           netScore
+          topic {
+            _id
+            comments {
+              _id
+            }
+          }
         }
       }
     `;
