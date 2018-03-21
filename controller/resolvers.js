@@ -3,8 +3,6 @@ const Users = require('../model/userSchema.js');
 const Topics = require('../model/topicSchema.js');
 const Comments = require('../model/commentsSchema.js');
 
-const io = require('./../server/higher.js').instatiateIO();
-
 
 
 const resolvers = {};
@@ -16,9 +14,6 @@ resolvers.User = {};
 const directiveResolvers = {
 	live: (resolve, source, args, context, info) => {
 		return resolve().then((result) => {
-			console.log(result);
-			io.sockets.emit('mutatedData', result);
-			io.sockets.emit('second', 'hello');
 			return result;
 		});
 	},

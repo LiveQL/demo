@@ -2,6 +2,7 @@
 //const server = require('http').Server(app);
 const sio = require('socket.io');
 const rdl = require('./rdl');
+const { graphql } = require('graphql');
 
 const liveServer = {};
 
@@ -22,6 +23,28 @@ liveServer.initialize =  (server) => {
 			});
 		});
 	});
+}
+
+//we built this emit function based on the assumption
+//that max and andrew were decent developers
+//and structured the rdl like this: 	hashedOneQuery: {
+// RDL.subscriptions = {
+// 	hashedTwoQuery: {
+// 		query: "query { getAllTopics { _id topic }}",
+// 		subscribers: 30
+// 	}
+// };
+
+liveServer.emit = (schema) => {
+	for (hashKey in rdl.queue) {
+		const query = async (rdlHash, hashKey) => {
+			graphql(schema, rdlHash.query)
+				.then(data => {
+					liveServer.io.sockets.emit(hashKey, data)
+				})
+		}
+		query(rdl.subscriptions[hashKey], hashKey)
+	}
 }
 
 
