@@ -1,0 +1,112 @@
+key={ind}@import url('https://fonts.googleapis.com/css?family=Nunito');
+body {
+  padding: 0px 0px;
+  width: 0px 0px;
+  background-color: #66CCFF;
+  font-family: sans-serif;
+}
+#root { 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.Navbar{
+  width: 70rem;
+}
+.parent{
+  display: flex;
+  align-items: center; 
+  flex-direction: column;
+  margin: 25px 0px 20px 0px;
+}
+.loader{
+  display: flex;
+  justify-content: center;
+  padding-top: 5rem;
+}
+
+.like-button {
+  /* visibility: hidden; */
+  font-size: 12px;
+  background-color: #0066FF;
+  color: #FFF;
+  border: 1px solid #0066FF;
+  border-radius: 4px;
+  margin-left: 16px;
+}
+#delete-button{
+  color: #FFFFFF;
+  background-color: #EF6365;
+  border: 1px solid hsla(0, 0%, 0%, 0.2);  
+  padding: 11px;
+  font-size: 16px;
+  margin: 10px;
+  padding-right: 10px;
+  border-radius: 10px;
+  outline: 0; 
+}
+.like-button:hover {
+  background-color: #FFFFFF;
+  color: #0066FF;
+  border: 2px solid #FFFFFF;
+  cursor: pointer;
+  outline: 0; 
+}
+#delete-button:hover {
+  background-color: #FFFFFF;
+  color: #EF6365;
+  border: 2px solid #FFFFFF;
+  cursor: pointer;
+  outline: 0; 
+}
+.topics{
+  padding: 4px 5px 4px 5px;
+  font-size: 20px;
+}
+.comments{
+  text-align: center;
+  width: 43rem;
+  font-family: 'Nunito';
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-image: linear-gradient(45deg, #B3E5FC, #E1F5FE);
+}
+.childComment{
+  /* color: red; */
+  /* border: 1px solid black; */
+}
+#author{
+  /* color: red; */
+  font-weight: bold;
+  display: inline;
+  margin-right: 7px;
+}
+h1 {
+  color: #f2f2f2; 
+  background: #ff4a4a; 
+  font-size: 75px; line-height: 74px; 
+  font-weight: 700; margin: 0 5px 24px; 
+  padding: 10px; 
+  font-family: 'Libre Baskerville', serif;
+  border-radius: 5px;
+}
+.parentForm{
+  text-align: center;
+}
+.parentInput{
+  margin: 20px 0px;
+}
+input {
+  text-align: center;
+  padding: 3px;
+  font-size: 13px;
+  border: 2px solid #FFF;
+  width: 15rem;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: 0;
+  margin-bottom: 5px;
+}
