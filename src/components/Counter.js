@@ -16,8 +16,8 @@ class Counter extends React.Component {
     const increaseLikes = `
     mutation increaseLikes($_id: String!) {
       increaseLikes(_id: $_id) {
-        topicId
         _id
+        topicId
         author
         text
         netScore

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+
 const Users = require('../model/userSchema.js');
 const Topics = require('../model/topicSchema.js');
 const Comments = require('../model/commentsSchema.js');
@@ -6,88 +6,45 @@ const Comments = require('../model/commentsSchema.js');
 const resolvers = {};
 resolvers.Query = {};
 resolvers.Topic = {};
-resolvers.User = {};
 resolvers.Mutation = {};
-
-resolvers.Query.users = () => {
-	return Users.find({}, (err) => {
-		if (err) throw err;
-	})
-		.then((result) => {
-			return result;
-		})
-		.catch((err) => {
-			console.log(err);
-		});
-};
-
-resolvers.Query.singleUser = (_, val) => {
-	return Users.findOne(val, (err) => {
-		if (err) throw err;
-	}).then((result) => {
-		return result;
-	}).catch((err) => {
-		console.log(err);
-	})
-}
+resolvers.Demo = {};
+resolvers.Comment = {};
 
 resolvers.Query.getAllTopics = () => {
-  return Topics.find({}, (err) => {if (err) throw err})
-  .then((result) => result)
-  .catch((err) => console.log(err));
-}
+  return {};
+};
 
-resolvers.Query.getASingleTopic = (_, paramObj) => {
-	let id = paramObj.id;
-	return Topics.findOne({_id: id}, (err) => {if (err) throw err})
-  .then((result) => result)
-  .catch((err) => console.log(err))
-}
+resolvers.Demo._id = () => '1';
 
-resolvers.Query.getAllComments = () => {
-	return Comments.find({}, (err) => {if (err) throw err})
-  .then((result) => result)
-  .catch((err) => console.log(err));
-}
+resolvers.Demo.topics = () => {
+  return Topics.find({}, (err) => { if (err) throw err; })
+    .then(result => result)
+    .catch(err => console.log(err));
+};
 
 resolvers.Topic.comments = (topic) => {
-	let topicId = topic._id;
-	return Comments.find({topicId: topicId}, (err) => {if (err) throw err})
-  .then((result) => result)
-  .catch((err) => console.log(err))
-}
+  const topicId = topic._id;
+  return Comments.find({ topicId }, (err) => { if (err) throw err; })
+    .then(result => result)
+    .catch(err => console.log(err));
+};
 
-resolvers.User.comments = (author) => {
-	let theAuthor = author.username;
-	return Comments.find({author: theAuthor}, (err) => {
-		if (err) throw err;
-	}).then((result) => {
-		return result;
-	}).catch((err) => {
-		console.log(err);
-	})
-}
+resolvers.Topic.demo = () => {
+  return {};
+};
 
-resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
-	return Users.create(usernameAndPassWord).then((result) => {
-		return result;
-	});
-}
+resolvers.Comment.topic = (comment) => {
+  return Topics.findOne({ _id: comment.topicId }, (err) => { if (err) throw err; })
+    .then(result => result)
+    .catch(err => console.log(err));
+};
 
-//this resolver resolves a schema defined query that takes in a user
-resolvers.Mutation.updatePassword = (_, usernameAndNewPassword) => {
-	return Users.findOneAndUpdate(
-		{username: usernameAndNewPassword.username}, //here we find a document based on the username
-		{password: usernameAndNewPassword.newPassword} //here we update the document that was found and change the password to be the new pw
-	).then((result) => {
-		return result;
-	});
-}
-
-//this resolver takes user obj and removes it from the db.
-resolvers.Mutation.deleteUser = (_, userObj) => {
-	return Users.findOneAndRemove(userObj).then(() => true);
-}
+// resolvers.Query.getASingleTopic = (_, paramObj) => {
+// 	let id = paramObj.id;
+// 	return Topics.findOne({_id: id}, (err) => {if (err) throw err})
+//   .then((result) => result)
+//   .catch((err) => console.log(err))
+// }
 
 resolvers.Mutation.addTopic = (_, topicObj) => {
 	return Topics.create(topicObj).then((result) => {
@@ -96,11 +53,10 @@ resolvers.Mutation.addTopic = (_, topicObj) => {
 }
 
 resolvers.Mutation.addComment = (_, commentObj) => {
-	console.log('inside addComment mutation');
-	return Comments.create(commentObj).then((result) => {
-		return result;
-	});
-}
+  return Comments.create(commentObj).then((result) => {
+    return result;
+  });
+};
 
 resolvers.Mutation.increaseLikes = (_, original) => {
 	return Comments.findOne({_id: original._id}).then((result) => {
@@ -112,10 +68,17 @@ resolvers.Mutation.increaseLikes = (_, original) => {
 	});
 }
 
-resolvers.Mutation.addUser = (_, usernameAndPassWord) => {
-	return Users.create(usernameAndPassWord).then((result) => {
-		return result;
-	});
-}
+module.exports = resolvers;
 
-module.exports = resolvers; 
+// resolvers.Query.getASingleTopic = (_, paramObj) => {
+// 	let id = paramObj.id;
+// 	return Topics.findOne({_id: id}, (err) => {if (err) throw err})
+//   .then((result) => result)
+//   .catch((err) => console.log(err))
+// }
+
+// resolvers.Query.getAllComments = () => {
+// 	return Comments.find({}, (err) => {if (err) throw err})
+//   .then((result) => result)
+//   .catch((err) => console.log(err));
+// }

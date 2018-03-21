@@ -22,6 +22,7 @@ class CommentForm extends Component {
     const addTopic = `
       mutation addTopic($topic: String!){
         addTopic (topic: $topic) {
+          _id
           topic
           comments {
             _id
@@ -29,6 +30,12 @@ class CommentForm extends Component {
             topicId
             text
             netScore
+          }
+          demo {
+            _id
+            topics {
+              _id
+            }
           }
         } 
       }

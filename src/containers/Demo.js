@@ -20,7 +20,7 @@ class Demo extends React.Component {
   }
 
   triggerRefresh(data) {
-   this.setState({ onComment: data.data })
+   this.setState({ onComment: data })
   }
 
   componentWillMount() {
@@ -28,32 +28,35 @@ class Demo extends React.Component {
     const query = `
       getAllTopics {
         _id
-        topic
-        comments {
+        topics {
           _id
-          author
-          topicId
-          text
-          netScore
+          topic
+          comments {
+            _id
+            author
+            topicId
+            text
+            netScore
+          }
         }
       }`;
 
     fetch('http://localhost:3000/graphql', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: `{ ${query} }` }),
+      body: JSON.stringify({ query: `query @live { ${query} }` }),
     })
     .then(res => res.json())
     .then((res) => {
-      this.setState({ onComment: res.data })
-      liveClient.on('triggerRefresh', this.triggerRefresh)
-    })
+      this.setState({ onComment: res.data });
+      liveClient.on(res.handle, this.triggerRefresh);
+    });
   }
 
   render() {
     let topics;
     if (this.state.onComment) {
-      topics = this.state.onComment.getAllTopics.map(({ _id, topic, comments, netScore }) => {
+      topics = this.state.onComment.getAllTopics.topics.map(({ _id, topic, comments, netScore }) => {
         return (
           <div className='comments' key={_id}>
             <div className='topics'>
