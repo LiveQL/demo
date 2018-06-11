@@ -70,7 +70,7 @@ class Demo extends React.Component {
       return (
         <div className="parent">
           <Header />
-          <ReactPlayer url='https://vimeo.com/channels/animatedshorts/137531269' />
+          <ReactPlayer url='https://youtu.be/hGTOTBpCeio' />
           <CommentForm />
           {topics}
         </div>
