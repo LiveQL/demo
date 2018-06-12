@@ -1,4 +1,4 @@
-LiveQL:
+**`LiveQL:`**
 
 LiveQL is a real-time library for graphQL in which the client subscribes to a specific mutation or query, (essentially subscribing to the data itself), as opposed to the an event.
 
@@ -15,5 +15,5 @@ To see it in full force follow these steps:
 1. clone this repo
 2. navigate to the deployed demo on Heroku
 3. In your terminal navigate to test/nightmare and run <code>node scraper.js</code>
-4. Watch headless browsers spins up and act as separate clients. You will see their interaction without refreshing the page.   
+4. Watch headless browsers spin up and act as separate clients. You will see their interaction without refreshing the page.   
 
