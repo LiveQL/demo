@@ -13,7 +13,7 @@ Feel free to download the zip and play around with it.
 
 To see it in full force follow these steps:
 1. clone this repo
-2. navigate to the deployed demo on heroku
+2. navigate to the deployed demo on Heroku
 3. In your terminal navigate to test/nightmare and run <code>node scraper.js</code>
-4. Watch headless browsers spins up and act as seperate clients. You will see their interaction without refreshing the page.   
+4. Watch headless browsers spins up and act as separate clients. You will see their interaction without refreshing the page.   
 
